@@ -9,7 +9,7 @@ require "chronicle/spotify"
 
 # (If you use this, don't forget to add pry to your Gemfile!)
 # require "pry"
-# Pry.start
+Pry.start
 
-require "irb"
-IRB.start(__FILE__)
+# require "irb"
+# IRB.start(__FILE__)

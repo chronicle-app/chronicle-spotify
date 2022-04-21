@@ -38,7 +38,9 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "chronicle-etl", "~> 0.5"
   spec.add_dependency "omniauth-spotify"
+  spec.add_dependency "rspotify", "~> 2.11"
 
+  spec.add_development_dependency "rubocop"
   spec.add_development_dependency "bundler", "~> 2.3"
   spec.add_development_dependency "rake", "~> 13.0.6"
   spec.add_development_dependency "pry-byebug", "~> 3.9"
