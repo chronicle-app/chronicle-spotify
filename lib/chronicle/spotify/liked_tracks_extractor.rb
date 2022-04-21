@@ -5,8 +5,8 @@ module Chronicle
     class SavedTracksExtractor < Chronicle::Spotify::SpotifyExtractor
       register_connector do |r|
         r.provider = 'spotify'
-        r.description = 'saved tracks'
-        r.identifier = 'saved-tracks'
+        r.description = 'liked tracks'
+        r.identifier = 'liked-tracks'
       end
 
       def extract

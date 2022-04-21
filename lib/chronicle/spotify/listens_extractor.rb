@@ -6,7 +6,7 @@ module Chronicle
       register_connector do |r|
         r.provider = 'spotify'
         r.description = 'listened tracks'
-        r.identifier = 'listened'
+        r.identifier = 'listens'
       end
 
       def extract
