@@ -3,8 +3,6 @@ require 'rspotify'
 module Chronicle
   module Spotify
     class Proxy
-      attr_reader :user
-
       PER_PAGE = 50
 
       def initialize(access_token:, refresh_token:, client_id:, client_secret:, uid:)
@@ -17,7 +15,11 @@ module Chronicle
         }
         RSpotify.authenticate(client_id, client_secret)
         RSpotify.raw_response = true
-        @user = RSpotify::User.new(auth_hash)
+        @authenticated_user = RSpotify::User.new(auth_hash)
+      end
+
+      def user
+        JSON.parse(RSpotify::User.find(@authenticated_user.id), symbolize_names: true)
       end
 
       def saved_albums(after: nil, limit:, &block)
@@ -68,7 +70,7 @@ module Chronicle
           before: before
         }.compact
 
-        JSON.parse(@user.send(method, **options), symbolize_names: true)
+        JSON.parse(@authenticated_user.send(method, **options), symbolize_names: true)
       end
     end
   end

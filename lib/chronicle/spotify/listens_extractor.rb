@@ -9,7 +9,7 @@ module Chronicle
 
       def extract
         @proxy.recently_played(after: @config.since, limit: @config.limit, before: @config.until) do |item|
-          yield Chronicle::ETL::Extraction.new(data: item, meta: { user: @proxy.user })
+          yield Chronicle::ETL::Extraction.new(data: item, meta: { actor: @actor })
         end
       end
     end

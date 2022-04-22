@@ -9,7 +9,7 @@ module Chronicle
 
       def extract
         @proxy.saved_albums(after: @config.since, limit: @config.limit) do |item|
-          yield Chronicle::ETL::Extraction.new(data: item, meta: { user: @proxy.user })
+          yield Chronicle::ETL::Extraction.new(data: item, meta: { actor: @actor })
         end
       end
     end

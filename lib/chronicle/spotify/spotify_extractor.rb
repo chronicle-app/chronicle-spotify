@@ -15,6 +15,7 @@ module Chronicle
           client_id: @config.client_id,
           client_secret: @config.client_secret
         )
+        @actor = @proxy.user
       end
     end
   end
