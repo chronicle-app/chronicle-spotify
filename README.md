@@ -1,39 +1,64 @@
 # Chronicle::Spotify
+[![Gem Version](https://badge.fury.io/rb/chronicle-spotify.svg)](https://badge.fury.io/rb/chronicle-spotify)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/chronicle/spotify`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'chronicle-spotify'
-```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install chronicle-spotify
+Extract your Spotify history using the command line with this plugin for [chronicle-etl](https://github.com/chronicle-app/chronicle-etl).
 
 ## Usage
 
-TODO: Write usage instructions here
+```sh
+# Install chronicle-etl and this plugin
+$ gem install chronicle-etl
+$ chronicle-etl plugins:install spotify
+```
 
-## Development
+### 1. Create a Spotify App
+To get access to the Spotify API, you must first create an app. Press the "Create an app" button in the [Developer Dashboard](https://developer.spotify.com/dashboard/applications).
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Then save the credentials: 
+```sh
+$ chronicle-etl secrets:set spotify client_id CLIENT_ID
+$ chronicle-etl secrets:set spotify client_secret
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+### 2. Authorize Spotify
 
-## Contributing
+To get an access token that's required by this plugin, use the authorization flow:
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/chronicle-spotify. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/chronicle-spotify/blob/main/CODE_OF_CONDUCT.md).
+```sh
+$ chronicle-etl authorizations:new spotify
+```
 
-## Code of Conduct
+This will save an access and refresh token in the chronicle secret system under the "spotify" namespace.
 
-Everyone interacting in the Chronicle::spotify project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/chronicle-spotify/blob/main/CODE_OF_CONDUCT.md).
+### 3. Use the Chronicle plugin
+```sh
+$ chronicle-etl --extractor spotify:listens --limit 10
+$ chronicle-etl --extractor spotify:saved-albums --limit 10
+$ chronicle-etl --extractor spotify:liked-tracks --limit 10
+```
+
+## Available Connectors
+### Extractors
+
+All the extractors expect `uid`, `access_token` and `refresh_token` to be available in your Chronicle secrets. After doing the authorization flow, you can verify that they exist using: `$ chronicle-etl secrets:list spotify`
+
+#### `liked-tracks`
+
+Extractor for your Spotify liked tracks
+
+#### `saved-albums`
+
+Extractor for your Spotify saved albums
+#### `listens`
+
+Extractor for your recent listens. Due to API limitations, only your 50 most recent 
+
+### Transformers
+
+#### `like`
+
+Transform a like (either from `saved-albums` or `liked-tracks`) into Chronicle Schema
+
+#### `listen`
+
+Transforms a listen (from `listens`) into Chronicle Schema
