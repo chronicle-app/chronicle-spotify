@@ -1,5 +1,3 @@
-require 'rspotify'
-
 module Chronicle
   module Spotify
     class ListenedExtractor < Chronicle::Spotify::SpotifyExtractor
