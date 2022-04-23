@@ -16,7 +16,7 @@ $ chronicle-etl plugins:install spotify
 ### 2. Create a Spotify App
 To get access to the Spotify API, you must first create an app. Press the "Create an app" button in the [Developer Dashboard](https://developer.spotify.com/dashboard/applications).
 
-After your app has been created, grab the client_id and client_secret credentials and save them to chronicle-etl secrets:
+In the app's setting, in the `Redirect URIs` field, add `http://localhost:4567/auth/spotify/callback`. After your app has been saved, grab the `client_id` and `client_secret` credentials and save them to chronicle-etl secrets:
 
 ```sh
 $ chronicle-etl secrets:set spotify client_id
