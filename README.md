@@ -41,7 +41,7 @@ $ chronicle-etl --extractor spotify:listens --limit 10
 # Extract liked tracks from the last week
 $ chronicle-etl --extractor spotify:liked-tracks --since 1w
 # Transform as Chronicle Schema
-$ chronicle-etl --extractor spotify:liked-tracks --since 1w --transformer chronicle:like --loader json
+$ chronicle-etl --extractor spotify:liked-tracks --since 1w --transformer spotify:like --loader json
 
 # Extract saved albums
 $ chronicle-etl --extractor spotify:saved-albums --limit 10
