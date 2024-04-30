@@ -1,15 +1,15 @@
 module Chronicle
   module Spotify
-    class SavedTracksExtractor < Chronicle::Spotify::SpotifyExtractor
+    class SavedAlbumExtractor < Chronicle::Spotify::SpotifyExtractor
       register_connector do |r|
         r.source = :spotify
-        r.type = :like
+        r.type = :saved_album
         r.strategy = :api
-        r.description = 'liked tracks'
+        r.description = 'saved_albums'
       end
 
       def extract
-        @proxy.saved_tracks(after: @config.since, limit: @config.limit) do |item|
+        @proxy.saved_albums(after: @config.since, limit: @config.limit) do |item|
           yield build_extraction(data: item, meta: { agent: @agent })
         end
       end

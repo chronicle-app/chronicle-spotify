@@ -36,15 +36,18 @@ This will open a browser window to authorize on spotify.com. When the flow is co
 ### 4. Use the the plugin
 ```sh
 # Extract recent limits
-$ chronicle-etl --extractor spotify:listens --limit 10
+$ chronicle-etl --extractor spotify:listen --limit 10
 
 # Extract liked tracks from the last week
-$ chronicle-etl --extractor spotify:liked-tracks --since 1w
+$ chronicle-etl --extractor spotify:like --since 1w
 # Transform as Chronicle Schema
-$ chronicle-etl --extractor spotify:liked-tracks --since 1w --transformer spotify:like --loader json
+$ chronicle-etl --extractor spotify:like --since 1w --schema chronicle
 
 # Extract saved albums
-$ chronicle-etl --extractor spotify:saved-albums --limit 10
+$ chronicle-etl --extractor spotify:saved-album --limit 10
+
+# Display a table of album names you've liked in last week
+$ chronicle-etl --extractor spotify:saved-album --since 1w --schema chronicle --loader table --fields end_time object.name
 ```
 
 ## Available Connectors
@@ -52,26 +55,16 @@ $ chronicle-etl --extractor spotify:saved-albums --limit 10
 
 All the extractors expect `uid`, `access_token` and `refresh_token` to be available in your Chronicle secrets. After doing the authorization flow, you can verify that they exist using: `$ chronicle-etl secrets:list spotify`
 
-#### `liked-tracks`
+#### `like`
 
 Extractor for your Spotify liked tracks
 
-#### `saved-albums`
+#### `saved-album`
 
 Extractor for your Spotify saved albums
-#### `listens`
-
-Extractor for your recent listens. Due to API limitations, only your 50 most recent 
-
-### Transformers
-
-#### `like`
-
-Transform a like (either from `saved-albums` or `liked-tracks`) into Chronicle Schema
-
 #### `listen`
 
-Transforms a listen (from `listens`) into Chronicle Schema
+Extractor for your recent listens. Due to API limitations, only your 50 most recent 
 
 ## Roadmap
 - extractor for playlist activity ([#3](https://github.com/chronicle-app/chronicle-spotify/issues/3))

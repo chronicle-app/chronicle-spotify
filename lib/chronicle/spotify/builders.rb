@@ -1,95 +1,73 @@
+require 'chronicle/models'
+
 module Chronicle
   module Spotify
     module Builders
-      def build_listen(track:, timestamp:, actor:)
-        record = ::Chronicle::ETL::Models::Activity.new({
-          verb: 'listened',
-          provider: 'spotify',
-          end_at: timestamp
-        })
-        record.dedupe_on << [:provider, :verb, :end_at]
-        record.actor = build_actor(actor)
-        record.involved = build_track(track)
-        record
+      def build_listen(record:, agent:)
+        Chronicle::Models::ListenAction.new do |r|
+          r.end_time = record[:played_at]
+          r.object = build_track(record[:track])
+          r.agent = build_agent(agent)
+          r.source = 'spotify'
+          r.dedupe_on << %i[type source end_time]
+        end
       end
 
-      def build_liked(object:, timestamp:, actor:)
-        record = ::Chronicle::ETL::Models::Activity.new({
-          verb: 'liked',
-          provider: 'spotify',
-          end_at: timestamp
-        })
-        record.dedupe_on << [:provider, :verb, :end_at]
-        record.actor = build_actor(actor)
+      def build_like(record:, agent:)
+        Chronicle::Models::LikeAction.new do |r|
+          r.end_time = record[:added_at]
 
-        record.involved = if object[:album_type]
-          build_album(object)
-        else
-          build_track(object)
+          r.object = if record[:album]
+                       build_album(record[:album])
+                     elsif record[:track]
+                       build_track(record[:track])
+                     end
+
+          r.agent = build_agent(agent)
+          r.source = 'spotify'
+          r.dedupe_on << %i[type source end_time]
         end
-
-        record
       end
 
       def build_track(track)
-        record = ::Chronicle::ETL::Models::Entity.new({
-          represents: 'song',
-          provider: 'spotify',
-          provider_id: track[:id],
-          title: track[:name],
-        })
-
-        record.creators = track[:artists].map{ |creator| build_creator(creator) }
-        record.containers = build_album(track[:album])
-        record.dedupe_on << [:provider, :provider_id, :represents]
-        record
+        Chronicle::Models::MusicRecording.new do |r|
+          r.name = track[:name]
+          r.in_album = [build_album(track[:album])]
+          r.by_artist = track[:artists].map { |artist| build_artist(artist) }
+          r.duration = "PT#{track[:duration_ms] / 1000.0}S"
+          r.source = 'spotify'
+          r.source_id = track[:id]
+          r.dedupe_on = [[:url], %i[source_id source type]]
+        end
       end
 
-      def build_creator(artist)
-        record = ::Chronicle::ETL::Models::Entity.new({
-          represents: 'musicartist',
-          provider: 'spotify',
-          provider_id: artist[:id],
-          provider_url: artist[:external_urls][:spotify],
-          title: artist[:name],
-        })
-        record.dedupe_on << [:provider_url]
-        record.dedupe_on << [:provider, :provider_id, :represents]
-        record
+      def build_artist(artist)
+        Chronicle::Models::MusicGroup.new do |r|
+          r.name = artist[:name]
+          r.url =  artist[:external_urls][:spotify]
+          r.source = 'spotify'
+          r.source_id = artist[:id]
+        end
       end
 
       def build_album(album)
-        record = ::Chronicle::ETL::Models::Entity.new({
-          represents: 'album',
-          provider: 'spotify',
-          provider_id: album[:id],
-          provider_url: album[:external_urls][:spotify],
-          title: album[:name],
-        })
-        record.attachments = build_image(album[:images].first[:url])
-        record.dedupe_on << [:provider_url]
-        record.dedupe_on << [:provider, :provider_id, :represents]
-        record
+        Chronicle::Models::MusicAlbum.new do |r|
+          r.name = album[:name]
+          r.source = 'spotify'
+          r.source_id = album[:id]
+          r.image = album[:images].first[:url]
+          r.url = album[:external_urls][:spotify]
+        end
       end
 
-      def build_image(image_url)
-        ::Chronicle::ETL::Models::Attachment.new({
-          url_original: image_url
-        })
-      end
-
-      def build_actor(actor)
-        record = ::Chronicle::ETL::Models::Entity.new({
-          represents: 'identity',
-          provider: 'spotify',
-          provider_id: actor[:id],
-          provider_url: actor[:external_urls][:spotify],
-          slug: actor[:id],
-          title: actor[:display_name]
-        })
-        record.dedupe_on << [:provider_url]
-        record.dedupe_on << [:provider, :provider_id, :represents]
-        record
+      def build_agent(agent)
+        Chronicle::Models::Person.new do |r|
+          r.name = agent[:display_name]
+          r.url = agent[:external_urls][:spotify]
+          r.source = 'spotify'
+          r.slug = agent[:id]
+          r.source_id = agent[:id]
+        end
       end
     end
   end

@@ -22,28 +22,28 @@ module Chronicle
         JSON.parse(RSpotify::User.find(@authenticated_user.id), symbolize_names: true)
       end
 
-      def saved_albums(after: nil, limit:, &block)
-        retrieve_all(method: :saved_albums, after: after, limit: limit, &block)
+      def saved_albums(limit:, after: nil, &block)
+        retrieve_all(method: :saved_albums, after:, limit:, &block)
       end
 
-      def saved_tracks(after: nil, limit:, &block)
-        retrieve_all(method: :saved_tracks, after: after, limit: limit, &block)
+      def saved_tracks(limit:, after: nil, &block)
+        retrieve_all(method: :saved_tracks, after:, limit:, &block)
       end
 
       def recently_played(before: nil, after: nil, limit: nil, &block)
         before = before&.to_i&.*(1000)
-        retrieve_all(method: :recently_played, before: before, after: after, limit: limit, &block)
+        retrieve_all(method: :recently_played, before:, after:, limit:, &block)
       end
 
       private
 
-      def retrieve_all(method:, before: nil, after: nil, limit: nil)
+      def retrieve_all(method:, before: nil, after: nil, limit: nil, &block)
         has_more = true
         count = 0
-        offset = 0 if method != :recently_played  # FIXME: hacky
+        offset = 0 if method != :recently_played # FIXME: hacky
 
         while has_more
-          response = retrieve_page(method: method, before: before, offset: offset)
+          response = retrieve_page(method:, before:, offset:)
 
           records = response[:items]
           records = records.first(limit - count) if limit
@@ -51,9 +51,7 @@ module Chronicle
 
           break unless records.any?
 
-          records.each do |track|
-            yield track
-          end
+          records.each(&block)
 
           count += records.count
           has_more = response[:next]
@@ -65,9 +63,9 @@ module Chronicle
 
       def retrieve_page(method:, before: nil, offset: nil)
         options = {
-          offset: offset,
+          offset:,
           limit: PER_PAGE,
-          before: before
+          before:
         }.compact
 
         JSON.parse(@authenticated_user.send(method, **options), symbolize_names: true)
